@@ -1,4 +1,4 @@
-# 🕒 Tick Utilities
+Utilities
 
 A lightweight **C++ timing and benchmarking library** featuring:
 
