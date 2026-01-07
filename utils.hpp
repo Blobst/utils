@@ -481,6 +481,99 @@ namespace snatch {
 	};
 
 	/**
+	 * @brief A wrapper that converts a value to text and appends either a string
+	 *        or the result of a callable (function / lambda).
+	 *
+	 * This struct supports two construction forms:
+	 *
+	 * 1️⃣ Value + Text
+	 *    VarAppender(value, "text");
+	 *
+	 * 2️⃣ Value + Callable
+	 *    VarAppender(value, callable);
+	 *
+	 * @param v
+	 *        The first argument. Any value streamable to std::ostream
+	 *        (int, double, std::string, etc.).
+	 *
+	 * @param text
+	 *        A std::string that is appended directly after the value.
+	 *
+	 * @param fn
+	 *        A callable taking no parameters and returning a value to append.
+	 *        Supported return types:
+	 *          - std::string → appended directly
+	 *          - numeric types → converted to string
+	 *          - std::chrono::system_clock::time_point → formatted datetime
+	 * @note also repent to the lord for using this struct ngl, you are a horrible person if you use this struct, because you are lazy to make your own structs
+	 */
+	struct Repent {
+		std::string value;
+
+		/**
+		 * @brief Construct by appending a string or callable after the value
+		 *
+		 * @tparam T Type of the main value (int, double, string, etc.)
+		 * @tparam S Type of value to append (string or callable)
+		 * @param v The main value
+		 * @param after The value to append after v (string or callable)
+		 */
+		template <typename T, typename S>
+		Repent(const T &v, S after)
+			requires(std::is_invocable_v<S> || std::is_convertible_v<S, std::string>)
+		{
+			value = toString(v) + toString(after);
+		}
+
+		/**
+		 * @brief Construct by prepending and appending values (strings or callables)
+		 *
+		 * @tparam T Type of the main value
+		 * @tparam B Type of the value to prepend (string or callable)
+		 * @tparam A Type of the value to append (string or callable)
+		 * @param v The main value
+		 * @param before Value to prepend before v
+		 * @param after Value to append after v
+		 */
+		template <typename T, typename B, typename A>
+		Repent(const T &v, B before, A after)
+			requires((std::is_invocable_v<B> || std::is_convertible_v<B, std::string>) &&
+					 (std::is_invocable_v<A> || std::is_convertible_v<A, std::string>))
+		{
+			value = toString(before) + toString(v) + toString(after);
+		}
+
+	private:
+		// Helper to convert any value to string, including callables and time_point
+		template <typename U>
+		static std::string toString(const U &val) {
+			std::ostringstream oss;
+
+			if constexpr (std::is_invocable_v<U>) {
+				auto result = val();
+				std::string s = toString(result);
+				// Add space before callable result unless it's a time_point (@ already has space)
+				if (!s.empty() && s[0] != '@')
+					s = " " + s;
+				return s;
+			} else if constexpr (std::is_same_v<U, std::chrono::system_clock::time_point>) {
+				std::time_t t = std::chrono::system_clock::to_time_t(val);
+				oss << " @ " << std::put_time(std::localtime(&t), "%Y-%m-%d %H:%M:%S");
+			} else {
+				oss << val;
+			}
+
+			return oss.str();
+		}
+
+	public:
+		/// @brief Allow direct printing via std::cout
+		friend std::ostream &operator<<(std::ostream &os, const Repent &v) {
+			return os << v.value;
+		}
+	};
+
+	/**
 	 * @brief Scope-based RAII wrapper that redirects std::cout to a string.
 	 *
 	 * @example
