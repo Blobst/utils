@@ -506,7 +506,8 @@ namespace snatch {
 	 *          - std::string → appended directly
 	 *          - numeric types → converted to string
 	 *          - std::chrono::system_clock::time_point → formatted datetime
-	 * @note also repent to the lord for using this struct ngl, you are a horrible person if you use this struct, because you are lazy to make your own structs
+	 * @note also repent to the lord for using this struct ngl, you are a horrible person if you use this struct, because you are lazy to make your own structs, wait, since i made this struct, does it make me a horrible person?. who knows.
+	 * @note i ate barbacue chicken
 	 */
 	struct Repent {
 		std::string value;
