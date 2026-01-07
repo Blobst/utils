@@ -8,7 +8,7 @@ A lightweight C++ header providing:
 - Output capturing tools (`snatch::Capture`, `Guard`, `DualCapture`, `Tee`, `Mute`)
 - String-builder utility `snatch::Repent` (value + before/after text or callables)
 
-Designed for precise profiling and easy drop-in use.
+so ngl use it 
 
 ---
 
