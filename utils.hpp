@@ -488,10 +488,10 @@ namespace snatch {
 	 * This struct supports two construction forms:
 	 *
 	 * 1️⃣ Value + Text
-	 *    VarAppender(value, "text");
+	 *    Repent(value, "text");
 	 *
 	 * 2️⃣ Value + Callable
-	 *    VarAppender(value, callable);
+	 *    Repent(value, callable);
 	 *
 	 * @param v
 	 *        The first argument. Any value streamable to std::ostream
