@@ -13,7 +13,7 @@
  * @author Ariel Zvinowanda
  * @date January 6, 2026
  * @note This library was made by the very very smart and cool Ariel zvinowanda
-
+ * @note Licensed by MIT ngl
  */
 
 #pragma once
@@ -33,8 +33,9 @@
 #include <sstream>
 #include <vector>
 
-/* usings */
-using steady = std::chrono::steady_clock;
+///
+using steady = std::chrono::steady_clock; ///< usings
+///
 
 namespace tick {
 	/**
