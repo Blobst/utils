@@ -755,4 +755,130 @@ namespace snatch {
 		}
 	};
 
+	struct CSV {
+		std::vector<std::string> header;
+		std::vector<std::vector<std::string>> rows;
+
+		// ----------- Helpers -----------
+	private:
+		static std::string escape(const std::string &value) {
+			bool needQuotes = value.find_first_of(",\"\n") != std::string::npos;
+			std::string out = value;
+
+			// Escape internal quotes
+			for (size_t pos = 0; (pos = out.find('"', pos)) != std::string::npos; pos += 2)
+				out.insert(pos, "\"");
+
+			return needQuotes ? "\"" + out + "\"" : out;
+		}
+
+		static std::vector<std::string> parseLine(const std::string &line) {
+			std::vector<std::string> result;
+			std::string cell;
+			bool inQuotes = false;
+
+			for (size_t i = 0; i < line.size(); ++i) {
+				char c = line[i];
+
+				if (c == '"') {
+					if (inQuotes && i + 1 < line.size() && line[i + 1] == '"') {
+						cell += '"';
+						++i;
+					} else {
+						inQuotes = !inQuotes;
+					}
+				} else if (c == ',' && !inQuotes) {
+					result.push_back(cell);
+					cell.clear();
+				} else {
+					cell += c;
+				}
+			}
+
+			result.push_back(cell);
+			return result;
+		}
+
+		// ----------- API -----------
+	public:
+		bool empty() const {
+			return rows.empty();
+		}
+
+		size_t rowCount() const {
+			return rows.size();
+		}
+
+		size_t columnCount() const {
+			return header.empty() ? 0 : header.size();
+		}
+
+		// Add a row
+		void addRow(const std::vector<std::string> &r) {
+			if (!header.empty() && r.size() != header.size())
+				throw std::runtime_error("Row size does not match header size");
+
+			rows.push_back(r);
+		}
+
+		// Load CSV from file
+		void load(const std::string &path, bool hasHeader = true) {
+			header.clear();
+			rows.clear();
+
+			std::ifstream file(path);
+			if (!file.is_open())
+				throw std::runtime_error("Failed to open CSV: " + path);
+
+			std::string line;
+			bool first = true;
+
+			while (std::getline(file, line)) {
+				if (line.empty())
+					continue;
+
+				auto parsed = parseLine(line);
+
+				if (first && hasHeader) {
+					header = parsed;
+					first = false;
+					continue;
+				}
+
+				rows.push_back(parsed);
+				first = false;
+			}
+		}
+
+		// Save CSV to file
+		void save(const std::string &path, bool append = false) const {
+			std::ofstream file(path, append ? std::ios::app : std::ios::trunc);
+
+			if (!file.is_open())
+				throw std::runtime_error("Failed to write CSV: " + path);
+
+			// Only write header when not appending
+			if (!append && !header.empty()) {
+				writeRow(file, header);
+			}
+
+			for (const auto &r : rows)
+				writeRow(file, r);
+		}
+
+	private:
+		static void writeRow(std::ofstream &file, const std::vector<std::string> &r) {
+			for (size_t i = 0; i < r.size(); ++i) {
+				file << escape(r[i]);
+				if (i + 1 < r.size())
+					file << ",";
+			}
+			file << "\n";
+		}
+	};
+
+	struct [[maybe_unused]] JSON {
+		/* Not implemented yet, looking for a json library */
+	};
+
 } // namespace snatch
